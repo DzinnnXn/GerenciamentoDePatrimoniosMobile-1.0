@@ -273,7 +273,7 @@ const darkTheme = StyleSheet.create({
     color: 'white',
   },
   input: {
-    color: 'fff',
+    color: 'white', // Corrigido aqui
     backgroundColor: '#181717',
   },
   modalButton: {
@@ -283,5 +283,4 @@ const darkTheme = StyleSheet.create({
     color: 'white',
   },
 });
-
 export default LoginScreen;

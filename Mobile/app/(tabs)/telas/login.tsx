@@ -20,30 +20,36 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
   const themeStyles = colorScheme === 'dark' ? darkTheme : lightTheme; // Aplica o tema
 
   // Função para salvar os dados no AsyncStorage
-  const saveUserData = async (user: string, userType: string, firstName: string) => {
+  // Função para salvar os dados no AsyncStorage
+  // Função para salvar os dados no AsyncStorage
+  const saveUserData = async (user: string, userType: string, firstName: string, roomData: any) => {
     try {
-      await AsyncStorage.multiSet([['user', user], ['userType', userType], ['firstName', firstName]]);
-      console.log('Dados salvos com sucesso no AsyncStorage:', { user, userType, firstName });
+      await AsyncStorage.multiSet([
+        ['user', user],
+        ['userType', userType],
+        ['firstName', firstName],
+        ['responsavel_sala', roomData.sala], // Salvando o nome da sala
+        ['descricao_sala', roomData.descricao], // Salvando a descrição da sala
+        ['localizacao_sala', roomData.localizacao], // Salvando a localização
+        ['link_imagem_sala', roomData.link_imagem], // Salvando o link da imagem da sala
+        ['responsavel_sala_email', roomData.email_responsavel], // Salvando o e-mail do responsável
+      ]);
+      console.log('Dados salvos com sucesso no AsyncStorage:', { user, userType, firstName, roomData });
 
-      // Verificação imediata
-      const storedUser = await AsyncStorage.getItem('user');
-      const storedUserType = await AsyncStorage.getItem('userType');
-      const storedFirstName = await AsyncStorage.getItem('firstName');
-
-      console.log('Dados recuperados do AsyncStorage:', {
-        user: storedUser,
-        userType: storedUserType,
-        firstName: storedFirstName,
-      });
+      // Chama a função para logar todos os dados armazenados
+      await logAsyncStorageData(); // Loga os dados para verificar
     } catch (error) {
       console.error('Erro ao salvar os dados:', error);
     }
   };
 
+
+
   // Função para realizar o login
   const handleLogin = async () => {
     setLoading(true);
     try {
+      // Primeiramente, faz o login do usuário
       const response = await fetch('http://192.168.0.10:8000/api/login/', {
         method: 'POST',
         headers: {
@@ -60,12 +66,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
       setLoading(false);
 
       if (response.ok && data.user && data.user_type && data.first_name) {
-        // Salvando os dados no AsyncStorage
-        await saveUserData(data.user, data.user_type, data.first_name);
-        Alert.alert('Sucesso', `Login bem-sucedido!`);
-        setModalVisible(false);
-        // Redireciona para a tela ServiceHome
-        onNavigate('ServiceHome');
+        // Após o login, fazemos a requisição para pegar a sala
+        const roomResponse = await fetch('http://192.168.0.10:8000/api/get_user_room/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: data.user, // Envia o username para pegar a sala associada
+          }),
+        });
+
+        const roomData = await roomResponse.json();
+        console.log('Resposta da API (Sala):', roomData); // Log da resposta da sala
+
+        if (roomResponse.ok && roomData.sala) {
+          // Agora que temos a sala, podemos salvar tudo no AsyncStorage
+          await saveUserData(data.user, data.user_type, data.first_name, roomData);
+          Alert.alert('Sucesso', `Login bem-sucedido!`);
+          setModalVisible(false);
+          // Redireciona para a tela ServiceHome
+          onNavigate('ServiceHome');
+        } else {
+          Alert.alert('Erro', roomData.message || 'Erro ao obter a sala, tente novamente.');
+        }
       } else {
         Alert.alert('Erro', data.message || 'Erro ao fazer login, tente novamente.');
       }
@@ -75,6 +99,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
       console.error('Erro ao realizar login:', error);
     }
   };
+
+
+  // Função para recuperar todos os dados salvos no AsyncStorage
+  // Função para logar todos os dados do AsyncStorage
+  const logAsyncStorageData = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const values = await AsyncStorage.multiGet(keys);
+      console.log('Dados do AsyncStorage:', values);
+    } catch (error) {
+      console.error('Erro ao ler os dados do AsyncStorage:', error);
+    }
+  };
+
+
 
   return (
     <View style={[styles.container, themeStyles.container]}>

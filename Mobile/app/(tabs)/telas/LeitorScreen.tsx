@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Footer from '@/components/footer';
 import IconButton from '@/components/IconButton';
 import * as Clipboard from 'expo-clipboard'; // Importando Clipboard
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Patrimonio {
   id: number;
@@ -28,6 +29,28 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [selectedPatrimonio, setSelectedPatrimonio] = useState<Patrimonio | null>(null);
   const qrCodeLock = useRef(false);
+
+  const getSalaQRCode = async () => {
+    try {
+      // Recuperar o nome da sala diretamente do AsyncStorage
+      const nomeSala = await AsyncStorage.getItem('responsavel_sala');
+      
+      if (nomeSala) {
+        const salaQRCode = nomeSala.trim().toLowerCase();
+        console.log(salaQRCode);
+      } else {
+        console.log('Sala não encontrada no AsyncStorage');
+      }
+    } catch (error) {
+      console.error('Erro ao recuperar dados do AsyncStorage', error);
+    }
+  };
+  
+  // Chama a função para pegar o nome da sala e gerar o QRCode
+  useEffect(() => {
+    getSalaQRCode();
+  }, []);
+  
 
   useEffect(() => {
     async function fetchPatrimonios() {
@@ -69,7 +92,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   }
   
 
-  function handleQRCodeRead(data: string) {
+  async function handleQRCodeRead(data: string) {
     setModalIsVisible(false);
     const match = data.match(/\b\d{6,7}\b/);
   
@@ -78,9 +101,26 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       const patrimonio = patrimonios.find(p => p.num_inventario === inventoryNumber);
   
       if (patrimonio) {
-        atualizarStatusLocalizacao(inventoryNumber); // Atualiza o status no backend
-        setSelectedPatrimonio(patrimonio);
-        setInfoModalVisible(true);
+        // Remove espaços extras e faz a comparação de forma case-insensitive
+        const salaPatrimonio = patrimonio.sala.trim().toLowerCase();
+  
+        // Pega o valor de responsavel_sala do AsyncStorage
+        const responsavelSala = await AsyncStorage.getItem('responsavel_sala');
+        
+        if (responsavelSala) {
+          const salaQRCode = responsavelSala.trim().toLowerCase();  // Agora você usa a sala do responsável (C12)
+  
+          // Verifica se o nome da sala no QR Code corresponde ao nome da sala do patrimônio
+          if (salaPatrimonio === salaQRCode) {
+            atualizarStatusLocalizacao(inventoryNumber); // Atualiza o status no backend
+            setSelectedPatrimonio(patrimonio);
+            setInfoModalVisible(true);
+          } else {
+            Alert.alert("Erro", `O patrimônio não corresponde à sala do QR Code. Esperado: ${salaQRCode}, Encontrado: ${salaPatrimonio}`);
+          }
+        } else {
+          Alert.alert("Erro", "Não foi possível recuperar a sala do responsável.");
+        }
       } else {
         Alert.alert("Patrimônio não encontrado", `Nenhum patrimônio corresponde ao inventário: ${inventoryNumber}`);
       }
@@ -88,6 +128,9 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       Alert.alert("Formato inválido", "O QR Code não contém um número de inventário válido.");
     }
   }
+  
+
+  
   
 
   // Função para copiar o número de inventário para a área de transferência
@@ -336,7 +379,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   copyButton: {
-    backgroundColor: '#8B0000',
+    backgroundColor: '#4CAF50',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',

@@ -58,9 +58,9 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       });
   
       if (response.status === 200) {
-        Alert.alert("Sucesso", "Status do patrimônio atualizado para 'localizado'.");
+        Alert.alert("Sucesso", "Patrimônio Validado!");
       } else {
-        Alert.alert("Erro", "Não foi possível atualizar o status do patrimônio.");
+        Alert.alert("Erro", "Não foi possível validar o patrimônio");
       }
     } catch (error) {
       console.error("Erro ao atualizar status:", error);

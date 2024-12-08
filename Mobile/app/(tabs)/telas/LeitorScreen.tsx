@@ -116,7 +116,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
             setSelectedPatrimonio(patrimonio);
             setInfoModalVisible(true);
           } else {
-            Alert.alert("Erro", `O patrimônio não corresponde à sala do QR Code. Esperado: ${salaQRCode}, Encontrado: ${salaPatrimonio}`);
+            Alert.alert("Erro", `O patrimônio não pertence a sala do usuário`);
           }
         } else {
           Alert.alert("Erro", "Não foi possível recuperar a sala do responsável.");
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   copyButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#8B0000',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',

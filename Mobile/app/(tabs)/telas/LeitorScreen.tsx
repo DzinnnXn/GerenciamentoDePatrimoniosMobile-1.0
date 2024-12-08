@@ -144,31 +144,68 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
 
       {/* Modal de informações do patrimônio */}
       <Modal visible={infoModalVisible} animationType="fade" transparent>
-        <View style={styles.infoModalContainer}>
-          <View style={styles.infoModalContent}>
-            <View style={styles.infoModalHeader}>
-              <Text style={styles.modalHeaderTitle}>Detalhes do Patrimônio</Text>
-              <TouchableOpacity onPress={() => setInfoModalVisible(false)} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-            {selectedPatrimonio && (
-              <ScrollView>
-                <Text style={[styles.infoText, themeStyles.infoText]}>Número de Inventário: <Text style={[styles.infoTextValue, themeStyles.infoTextValue]}>{selectedPatrimonio.num_inventario}</Text></Text>
-                <Text style={[styles.infoText, themeStyles.infoText]}>Denominação: <Text style={[styles.infoTextValue, themeStyles.infoTextValue]}>{selectedPatrimonio.denominacao}</Text></Text>
-                <Text style={[styles.infoText, themeStyles.infoText]}>Localização: <Text style={[styles.infoTextValue, themeStyles.infoTextValue]}>{selectedPatrimonio.localizacao}</Text></Text>
-                <Text style={[styles.infoText, themeStyles.infoText]}>Sala: <Text style={[styles.infoTextValue, themeStyles.infoTextValue]}>{selectedPatrimonio.sala}</Text></Text>
-                {selectedPatrimonio.link_imagem && (
-                  <Image source={{ uri: selectedPatrimonio.link_imagem }} style={styles.image} />
-                )}
-                <TouchableOpacity style={[styles.copyButton, themeStyles.copyButton]} onPress={() => handleCopyToClipboard(selectedPatrimonio.num_inventario)}>
-                  <Text style={[styles.copyButtonText, themeStyles.copyButtonText]}>Copiar Número de Inventário</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            )}
-          </View>
-        </View>
-      </Modal>
+  <View style={styles.infoModalContainer}>
+    <View style={styles.infoModalContent}>
+      {/* Cabeçalho da Modal */}
+      <View style={styles.infoModalHeader}>
+        <Text style={styles.modalHeaderTitle}>Detalhes do Patrimônio</Text>
+        <TouchableOpacity
+          onPress={() => setInfoModalVisible(false)}
+          style={styles.closeButton}
+        >
+          <Ionicons name="close" size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Conteúdo */}
+      {selectedPatrimonio && (
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.infoText}>
+            Número de Inventário:{" "}
+            <Text style={styles.infoTextValue}>
+              {selectedPatrimonio.num_inventario}
+            </Text>
+          </Text>
+          <Text style={styles.infoText}>
+            Denominação:{" "}
+            <Text style={styles.infoTextValue}>
+              {selectedPatrimonio.denominacao}
+            </Text>
+          </Text>
+          <Text style={styles.infoText}>
+            Localização:{" "}
+            <Text style={styles.infoTextValue}>
+              {selectedPatrimonio.localizacao}
+            </Text>
+          </Text>
+          <Text style={styles.infoText}>
+            Sala:{" "}
+            <Text style={styles.infoTextValue}>{selectedPatrimonio.sala}</Text>
+          </Text>
+          {selectedPatrimonio.link_imagem && (
+            <Image
+              source={{ uri: selectedPatrimonio.link_imagem }}
+              style={styles.image}
+            />
+          )}
+
+          {/* Botão de Copiar */}
+          <TouchableOpacity
+            style={styles.copyButton}
+            onPress={() =>
+              handleCopyToClipboard(selectedPatrimonio.num_inventario)
+            }
+          >
+            <Text style={styles.copyButtonText}>
+              Copiar Número de Inventário
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+    </View>
+  </View>
+</Modal>
+
 
       <Footer onNavigate={onNavigate} />
     </View>
@@ -248,55 +285,66 @@ const styles = StyleSheet.create({
   },
   infoModalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escuro translúcido
+    justifyContent: 'center', // Centraliza verticalmente
+    alignItems: 'center', // Centraliza horizontalmente
   },
   infoModalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginHorizontal: 30,
+    width: '90%',
+    maxHeight: '80%', // Limita a altura máxima
+    backgroundColor: '#fff', // Fundo branco
     borderRadius: 10,
-    maxHeight: '80%',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // Sombra no Android
   },
   infoModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   modalHeaderTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
   closeButton: {
-    padding: 5,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#eee',
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   infoText: {
     fontSize: 16,
-    marginVertical: 5,
+    color: '#333',
+    marginBottom: 5,
   },
   infoTextValue: {
     fontWeight: 'bold',
+    color: '#555',
   },
   image: {
-    width: 150,
-    height: 150,
-    resizeMode: 'cover',
-    borderRadius: 10,
-    marginTop: 15,
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginVertical: 10,
   },
   copyButton: {
     backgroundColor: '#8B0000',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    alignSelf: 'center',
-    marginTop: 15,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
   },
   copyButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
 

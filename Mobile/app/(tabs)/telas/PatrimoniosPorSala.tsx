@@ -102,12 +102,13 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
     <TouchableOpacity style={styles.card}>
       <Image source={{ uri: item.link_imagem }} style={styles.image} />
       <View style={styles.info}>
-        <Text style={styles.patrimonioName}>{item.denominacao}</Text>
-        <Text style={styles.location}>{item.localizacao}</Text>
-        <Text style={styles.inventoryNumber}>{item.num_inventario}</Text>
+        <Text style={[styles.patrimonioName, themeStyles.patrimonioName]}>{item.denominacao}</Text>
+        <Text style={[styles.location, themeStyles.location]}>{item.localizacao}</Text>
+        <Text style={[styles.inventoryNumber, themeStyles.inventoryNumber]}>{item.num_inventario}</Text>
       </View>
     </TouchableOpacity>
   );
+  
 
   const getUserType = async () => {
     try {
@@ -372,7 +373,7 @@ const darkTheme = StyleSheet.create({
     color: '#fff',
   },
   patrimonioName: {
-    color: '#fff',
+    color: '#fff', // Texto branco no modo dark
   },
   location: {
     color: '#bbb',
@@ -391,5 +392,6 @@ const darkTheme = StyleSheet.create({
     marginBottom: 10,
   },
 });
+
 
 export default PatrimoniosPorSala;

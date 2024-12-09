@@ -24,32 +24,34 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
   // Função para salvar os dados no AsyncStorage
   const saveUserData = async (user: string, userType: string, firstName: string, roomData: any) => {
     try {
-      await AsyncStorage.multiSet([
+      const dataToSave: [string, string][] = [
         ['user', user],
         ['userType', userType],
         ['firstName', firstName],
-        ['responsavel_sala', roomData.sala], // Salvando o nome da sala
-        ['descricao_sala', roomData.descricao], // Salvando a descrição da sala
-        ['localizacao_sala', roomData.localizacao], // Salvando a localização
-        ['link_imagem_sala', roomData.link_imagem], // Salvando o link da imagem da sala
-        ['responsavel_sala_email', roomData.email_responsavel], // Salvando o e-mail do responsável
-      ]);
-      console.log('Dados salvos com sucesso no AsyncStorage:', { user, userType, firstName, roomData });
-
-      // Chama a função para logar todos os dados armazenados
-      await logAsyncStorageData(); // Loga os dados para verificar
+      ];
+  
+      // Adicione os dados da sala somente se estiverem disponíveis
+      if (roomData.sala) dataToSave.push(['responsavel_sala', roomData.sala]);
+      if (roomData.descricao) dataToSave.push(['descricao_sala', roomData.descricao]);
+      if (roomData.localizacao) dataToSave.push(['localizacao_sala', roomData.localizacao]);
+      if (roomData.link_imagem) dataToSave.push(['link_imagem_sala', roomData.link_imagem]);
+      if (roomData.email_responsavel) dataToSave.push(['responsavel_sala_email', roomData.email_responsavel]);
+  
+      await AsyncStorage.multiSet(dataToSave);
+      console.log('Dados salvos com sucesso no AsyncStorage:', dataToSave);
+  
+      // Loga os dados para verificar
+      await logAsyncStorageData();
     } catch (error) {
       console.error('Erro ao salvar os dados:', error);
     }
   };
+  
 
-
-
-  // Função para realizar o login
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // Primeiramente, faz o login do usuário
+      // Faz o login do usuário
       const response = await fetch('http://192.168.0.10:8000/api/login/', {
         method: 'POST',
         headers: {
@@ -60,35 +62,44 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
           password: password.trim(),
         }),
       });
-
+  
       const data = await response.json();
       console.log('Resposta da API:', data); // Log da resposta para depuração
       setLoading(false);
-
+  
       if (response.ok && data.user && data.user_type && data.first_name) {
-        // Após o login, fazemos a requisição para pegar a sala
-        const roomResponse = await fetch('http://192.168.0.10:8000/api/get_user_room/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: data.user, // Envia o username para pegar a sala associada
-          }),
-        });
-
-        const roomData = await roomResponse.json();
-        console.log('Resposta da API (Sala):', roomData); // Log da resposta da sala
-
-        if (roomResponse.ok && roomData.sala) {
-          // Agora que temos a sala, podemos salvar tudo no AsyncStorage
-          await saveUserData(data.user, data.user_type, data.first_name, roomData);
-          Alert.alert('Sucesso', `Login bem-sucedido!`);
+        if (data.user_type === "Coordenador") {
+          // Coordenador não precisa buscar sala
+          await saveUserData(data.user, data.user_type, data.first_name, {}); // Passa um objeto vazio para roomData
+          Alert.alert('Sucesso', 'Login bem-sucedido!');
           setModalVisible(false);
-          // Redireciona para a tela ServiceHome
+          // Redireciona para a tela do Coordenador
           onNavigate('ServiceHome');
         } else {
-          Alert.alert('Erro', roomData.message || 'Erro ao obter a sala, tente novamente.');
+          // Se for um professor, busca a sala
+          const roomResponse = await fetch('http://192.168.0.10:8000/api/get_user_room/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: data.user, // Envia o username para pegar a sala associada
+            }),
+          });
+  
+          const roomData = await roomResponse.json();
+          console.log('Resposta da API (Sala):', roomData); // Log da resposta da sala
+  
+          if (roomResponse.ok && roomData.sala) {
+            // Agora que temos a sala, podemos salvar tudo no AsyncStorage
+            await saveUserData(data.user, data.user_type, data.first_name, roomData);
+            Alert.alert('Sucesso', 'Login bem-sucedido!');
+            setModalVisible(false);
+            // Redireciona para a tela do Professor
+            onNavigate('ServiceHome');
+          } else {
+            Alert.alert('Erro', roomData.message || 'Erro ao obter a sala, tente novamente.');
+          }
         }
       } else {
         Alert.alert('Erro', data.message || 'Erro ao fazer login, tente novamente.');
@@ -99,6 +110,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
       console.error('Erro ao realizar login:', error);
     }
   };
+  
 
 
   // Função para recuperar todos os dados salvos no AsyncStorage

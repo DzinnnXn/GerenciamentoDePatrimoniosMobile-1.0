@@ -19,6 +19,7 @@ interface Patrimonio {
 
 interface ScannerScreenProps {
   onNavigate: (screen: string) => void;
+  userType: 'Coordenador' | 'Professor';
 }
 
 const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
@@ -28,6 +29,27 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [selectedPatrimonio, setSelectedPatrimonio] = useState<Patrimonio | null>(null);
+  const [userType, setUserType] = useState<'Coordenador' | 'Professor' | null>(null);
+
+  useEffect(() => {
+    const loadUserType = async () => {
+      try {
+        const storedUserType = await AsyncStorage.getItem('userType');
+        if (storedUserType === 'Coordenador' || storedUserType === 'Professor') {
+          setUserType(storedUserType); // atualiza o estado
+          console.log("UserType recuperado:", storedUserType);
+        } else {
+          console.error('Tipo de usuário inválido encontrado:', storedUserType);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o userType:', error);
+      }
+    };
+  
+    loadUserType();
+  }, []);
+  
+
   const qrCodeLock = useRef(false);
 
   const getSalaQRCode = async () => {
@@ -101,25 +123,33 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       const patrimonio = patrimonios.find(p => p.num_inventario === inventoryNumber);
   
       if (patrimonio) {
-        // Remove espaços extras e faz a comparação de forma case-insensitive
         const salaPatrimonio = patrimonio.sala.trim().toLowerCase();
-  
-        // Pega o valor de responsavel_sala do AsyncStorage
         const responsavelSala = await AsyncStorage.getItem('responsavel_sala');
-        
-        if (responsavelSala) {
-          const salaQRCode = responsavelSala.trim().toLowerCase();  // Agora você usa a sala do responsável (C12)
   
-          // Verifica se o nome da sala no QR Code corresponde ao nome da sala do patrimônio
-          if (salaPatrimonio === salaQRCode) {
-            atualizarStatusLocalizacao(inventoryNumber); // Atualiza o status no backend
-            setSelectedPatrimonio(patrimonio);
-            setInfoModalVisible(true);
+        console.log("UserType atual:", userType); // Log para depuração
+  
+        if (userType === 'Coordenador') {
+          // Coordenadores podem validar qualquer patrimônio
+          atualizarStatusLocalizacao(inventoryNumber);
+          setSelectedPatrimonio(patrimonio);
+          setInfoModalVisible(true);
+        } else if (userType === 'Professor') {
+          // Professores só validam patrimônios da mesma sala
+          if (responsavelSala) {
+            const salaQRCode = responsavelSala.trim().toLowerCase();
+  
+            if (salaPatrimonio === salaQRCode) {
+              atualizarStatusLocalizacao(inventoryNumber);
+              setSelectedPatrimonio(patrimonio);
+              setInfoModalVisible(true);
+            } else {
+              Alert.alert("Erro", `O patrimônio não pertence à sua sala`);
+            }
           } else {
-            Alert.alert("Erro", `O patrimônio não pertence a sala do usuário`);
+            Alert.alert("Erro", "Não foi possível recuperar a sala do responsável.");
           }
         } else {
-          Alert.alert("Erro", "Não foi possível recuperar a sala do responsável.");
+          Alert.alert("Erro", "Tipo de usuário inválido ou não identificado.");
         }
       } else {
         Alert.alert("Patrimônio não encontrado", `Nenhum patrimônio corresponde ao inventário: ${inventoryNumber}`);
@@ -128,6 +158,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       Alert.alert("Formato inválido", "O QR Code não contém um número de inventário válido.");
     }
   }
+  
   
 
   
@@ -149,7 +180,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
       />
       <View style={styles.header}>
-        <IconButton iconName="arrow-back" onPress={() => onNavigate('Home')} />
+        <IconButton iconName="arrow-back" onPress={() => onNavigate('ServiceHome')} />
         <IconButton iconName="menu" onPress={() => onNavigate('Menu')} />
       </View>
 

@@ -64,12 +64,12 @@ const ServiceHomeScreen: React.FC<ServiceHomeScreenProps> = ({ onNavigate }) => 
             </TouchableOpacity>
           </>
         )}
-        <TouchableOpacity style={[styles.serviceButton, themeStyles.serviceButton]} onPress={() => onNavigate('Patrimonio')}>
-          <Text style={[styles.buttonText, themeStyles.buttonText]}>Adicionar à lista de manutenção do patrimônio</Text>
+        <TouchableOpacity style={[styles.serviceButton, themeStyles.serviceButton]} onPress={() => onNavigate('Salas')}>
+          <Text style={[styles.buttonText, themeStyles.buttonText]}>Visualizar salas</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.serviceButton, themeStyles.serviceButton]} onPress={() => onNavigate('Patrimonio')}>
-          <Text style={[styles.buttonText, themeStyles.buttonText]}>Ver Tabela de Patrimônios</Text>
+        <TouchableOpacity style={[styles.serviceButton, themeStyles.serviceButton]} onPress={() => onNavigate('Leitor')}>
+          <Text style={[styles.buttonText, themeStyles.buttonText]}>Escanear patrimônio</Text>
         </TouchableOpacity>
       </View>
 

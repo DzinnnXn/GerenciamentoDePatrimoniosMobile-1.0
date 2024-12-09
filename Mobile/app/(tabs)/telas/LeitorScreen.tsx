@@ -15,7 +15,9 @@ interface Patrimonio {
   localizacao: string;
   sala: string;
   link_imagem: string;
+  validado?: boolean; // Propriedade opcional
 }
+
 
 interface ScannerScreenProps {
   onNavigate: (screen: string) => void;
@@ -30,6 +32,8 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [selectedPatrimonio, setSelectedPatrimonio] = useState<Patrimonio | null>(null);
   const [userType, setUserType] = useState<'Coordenador' | 'Professor' | null>(null);
+  const scheme = useColorScheme();
+  const isDarkMode = scheme === 'dark';
 
   useEffect(() => {
     const loadUserType = async () => {
@@ -78,13 +82,18 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
     async function fetchPatrimonios() {
       try {
         const response = await axios.get<Patrimonio[]>('http://192.168.0.10:8000/api/inventarios/');
-        setPatrimonios(response.data);
+        const updatedPatrimonios = response.data.map(p => ({
+          ...p,
+          validado: false, // Adiciona a propriedade validado
+        }));
+        setPatrimonios(updatedPatrimonios); // Atualiza o estado com os patrimônios modificados
       } catch (error) {
         console.error("Erro ao carregar patrimônios:", error);
       }
     }
     fetchPatrimonios();
   }, []);
+  
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
@@ -123,6 +132,12 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       const patrimonio = patrimonios.find(p => p.num_inventario === inventoryNumber);
   
       if (patrimonio) {
+        // Adiciona a verificação no frontend se já foi validado
+        if (patrimonio.validado) {
+          Alert.alert("Informação", "Este patrimônio já foi validado.");
+          return;
+        }
+  
         const salaPatrimonio = patrimonio.sala.trim().toLowerCase();
         const responsavelSala = await AsyncStorage.getItem('responsavel_sala');
   
@@ -130,6 +145,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   
         if (userType === 'Coordenador') {
           // Coordenadores podem validar qualquer patrimônio
+          patrimonio.validado = true; // Marca como validado no frontend
           atualizarStatusLocalizacao(inventoryNumber);
           setSelectedPatrimonio(patrimonio);
           setInfoModalVisible(true);
@@ -139,11 +155,12 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
             const salaQRCode = responsavelSala.trim().toLowerCase();
   
             if (salaPatrimonio === salaQRCode) {
+              patrimonio.validado = true; // Marca como validado no frontend
               atualizarStatusLocalizacao(inventoryNumber);
               setSelectedPatrimonio(patrimonio);
               setInfoModalVisible(true);
             } else {
-              Alert.alert("Erro", `O patrimônio não pertence à sua sala`);
+              Alert.alert("Erro", "O patrimônio não pertence à sua sala.");
             }
           } else {
             Alert.alert("Erro", "Não foi possível recuperar a sala do responsável.");
@@ -158,6 +175,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
       Alert.alert("Formato inválido", "O QR Code não contém um número de inventário válido.");
     }
   }
+  
   
   
 
@@ -216,69 +234,74 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
         />
       </Modal>
 
-      {/* Modal de informações do patrimônio */}
+
+
       <Modal visible={infoModalVisible} animationType="fade" transparent>
-  <View style={styles.infoModalContainer}>
-    <View style={styles.infoModalContent}>
-      {/* Cabeçalho da Modal */}
-      <View style={styles.infoModalHeader}>
-        <Text style={styles.modalHeaderTitle}>Detalhes do Patrimônio</Text>
-        <TouchableOpacity
-          onPress={() => setInfoModalVisible(false)}
-          style={styles.closeButton}
-        >
-          <Ionicons name="close" size={24} color="#333" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Conteúdo */}
-      {selectedPatrimonio && (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.infoText}>
-            Número de Inventário:{" "}
-            <Text style={styles.infoTextValue}>
-              {selectedPatrimonio.num_inventario}
-            </Text>
+    <View style={[styles.infoModalContainer, isDarkMode && styles.darkMode]}>
+      <View style={[styles.infoModalContent, isDarkMode && styles.darkModeContent]}>
+        {/* Cabeçalho da Modal */}
+        <View style={[styles.infoModalHeader, isDarkMode && styles.darkModeHeader]}>
+          <Text style={[styles.modalHeaderTitle, isDarkMode && styles.darkModeText]}>
+            Detalhes do Patrimônio
           </Text>
-          <Text style={styles.infoText}>
-            Denominação:{" "}
-            <Text style={styles.infoTextValue}>
-              {selectedPatrimonio.denominacao}
-            </Text>
-          </Text>
-          <Text style={styles.infoText}>
-            Localização:{" "}
-            <Text style={styles.infoTextValue}>
-              {selectedPatrimonio.localizacao}
-            </Text>
-          </Text>
-          <Text style={styles.infoText}>
-            Sala:{" "}
-            <Text style={styles.infoTextValue}>{selectedPatrimonio.sala}</Text>
-          </Text>
-          {selectedPatrimonio.link_imagem && (
-            <Image
-              source={{ uri: selectedPatrimonio.link_imagem }}
-              style={styles.image}
-            />
-          )}
-
-          {/* Botão de Copiar */}
           <TouchableOpacity
-            style={styles.copyButton}
-            onPress={() =>
-              handleCopyToClipboard(selectedPatrimonio.num_inventario)
-            }
+            onPress={() => setInfoModalVisible(false)}
+            style={styles.closeButton}
           >
-            <Text style={styles.copyButtonText}>
-              Copiar Número de Inventário
-            </Text>
+            <Ionicons name="close" size={24} color={isDarkMode ? "#333" : "#333"} />
           </TouchableOpacity>
-        </ScrollView>
-      )}
+        </View>
+
+        {/* Conteúdo */}
+        {selectedPatrimonio && (
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Text style={[styles.infoText, isDarkMode && styles.darkModeText]}>
+              Número de Inventário:{" "}
+              <Text style={[styles.infoTextValue, isDarkMode && styles.darkModeTextValue]}>
+                {selectedPatrimonio.num_inventario}
+              </Text>
+            </Text>
+            <Text style={[styles.infoText, isDarkMode && styles.darkModeText]}>
+              Denominação:{" "}
+              <Text style={[styles.infoTextValue, isDarkMode && styles.darkModeTextValue]}>
+                {selectedPatrimonio.denominacao}
+              </Text>
+            </Text>
+            <Text style={[styles.infoText, isDarkMode && styles.darkModeText]}>
+              Localização:{" "}
+              <Text style={[styles.infoTextValue, isDarkMode && styles.darkModeTextValue]}>
+                {selectedPatrimonio.localizacao}
+              </Text>
+            </Text>
+            <Text style={[styles.infoText, isDarkMode && styles.darkModeText]}>
+              Sala:{" "}
+              <Text style={[styles.infoTextValue, isDarkMode && styles.darkModeTextValue]}>
+                {selectedPatrimonio.sala}
+              </Text>
+            </Text>
+            {selectedPatrimonio.link_imagem && (
+              <Image
+                source={{ uri: selectedPatrimonio.link_imagem }}
+                style={styles.image}
+              />
+            )}
+
+            {/* Botão de Copiar */}
+            <TouchableOpacity
+              style={[styles.copyButton, isDarkMode && styles.darkModeButton]}
+              onPress={() =>
+                handleCopyToClipboard(selectedPatrimonio.num_inventario)
+              }
+            >
+              <Text style={[styles.copyButtonText, isDarkMode && styles.darkModeText]}>
+                Copiar Número de Inventário
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </View>
     </View>
-  </View>
-</Modal>
+  </Modal>
 
 
       <Footer onNavigate={onNavigate} />
@@ -420,6 +443,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  darkMode: {
+    backgroundColor: 'rgba(0, 0, 0, 0.9)', // Fundo mais escuro no dark mode
+  },
+  darkModeContent: {
+    backgroundColor: '#333', // Escuro
+  },
+  darkModeHeader: {
+    backgroundColor: '#333', // Fundo mais escuro no cabeçalho
+  },
+  darkModeText: {
+    color: '#fff', // Texto branco no dark mode
+  },
+  darkModeTextValue: {
+    fontWeight: 'bold',
+    color: '#ffcc00', // Cor de destaque no dark mode
+  },
+  darkModeButton: {
+    backgroundColor: '#8B0000', // Cor de fundo do botão no dark mode
+  },
+
 });
 
 // Estilos para temas claro e escuro

@@ -25,6 +25,10 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
     email_responsavel 
   } = route.params;
 
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [selectedPatrimonio, setSelectedPatrimonio] = useState<Patrimonio | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
   const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -98,8 +102,14 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
     }
   };
 
+  const openDetailsModal = (patrimonio: Patrimonio) => {
+    setSelectedPatrimonio(patrimonio);
+    setDetailsModalVisible(true);
+  };
+  
+
   const renderCard = (item: Patrimonio) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => openDetailsModal(item)}>
       <Image source={{ uri: item.link_imagem }} style={styles.image} />
       <View style={styles.info}>
         <Text style={[styles.patrimonioName, themeStyles.patrimonioName]}>{item.denominacao}</Text>
@@ -108,6 +118,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
       </View>
     </TouchableOpacity>
   );
+  
   
 
   const getUserType = async () => {
@@ -230,6 +241,47 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
           </View>
         </View>
       </Modal>
+
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={detailsModalVisible}
+  onRequestClose={() => setDetailsModalVisible(false)}
+>
+  <View style={[styles.modalContainer]}>
+    <View style={[styles.modalContent, themeStyles.modalContent]}>
+      <Text style={[styles.modalTitle, themeStyles.modalTitle]}>Detalhes do Patrimônio</Text>
+
+      {selectedPatrimonio && (
+        <>
+          <Text style={[styles.label, themeStyles.text]}>Denominação:</Text>
+          <Text style={[styles.input, themeStyles.input]}>{selectedPatrimonio.denominacao}</Text>
+
+          <Text style={[styles.label, themeStyles.text]}>Localização:</Text>
+          <Text style={[styles.input, themeStyles.input]}>{selectedPatrimonio.localizacao}</Text>
+
+          <Text style={[styles.label, themeStyles.text]}>Sala:</Text>
+          <Text style={[styles.input, themeStyles.input]}>{selectedPatrimonio.sala}</Text>
+
+          <Text style={[styles.label, themeStyles.text]}>Link da Imagem:</Text>
+          <Text style={[styles.input, themeStyles.input]}>{selectedPatrimonio.link_imagem}</Text>
+
+          <Text style={[styles.label, themeStyles.text]}>Num Inventário:</Text>
+          <Text style={[styles.input, themeStyles.input]}>{selectedPatrimonio.num_inventario}</Text>
+
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setDetailsModalVisible(false)}
+          >
+            <Text style={styles.modalCloseButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+  </View>
+</Modal>
+
+      
       <Footer onNavigate={onNavigate} />
     </View>
   );
@@ -333,7 +385,12 @@ const styles = StyleSheet.create({
   },
   num_inventario: {
     color: 'fff'
-  }
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
 });
 
 // Estilos para tema claro e escuro
@@ -362,10 +419,14 @@ const lightTheme = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    color: '#000'
   },
   modalTitle: {
     color: '#000'
   },
+  text: {
+    color: '#000'
+  }
 });
 
 const darkTheme = StyleSheet.create({
@@ -393,10 +454,14 @@ const darkTheme = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    color: '#fff'
   },
   modalTitle: {
     color: '#fff'
   },
+  text: {
+    color: '#fff'
+  }
 });
 
 

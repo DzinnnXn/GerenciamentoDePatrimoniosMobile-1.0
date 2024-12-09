@@ -50,7 +50,7 @@ const Cadastro: React.FC<CadastroProps> = ({ onNavigate }) => {
     }
 
     try {
-      const response = await axios.post('http://192.168.0.10:8000/api/cadastro/', formData);
+      const response = await axios.post('https://patrimoniosemordem.nestguard.com.br/api/cadastro/', formData);
       if (response.status === 200) {
         Alert.alert('Cadastro', 'Cadastro realizado com sucesso!');
         onNavigate('Login');

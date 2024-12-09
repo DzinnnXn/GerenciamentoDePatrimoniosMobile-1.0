@@ -44,7 +44,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
   useEffect(() => {
     const fetchPatrimonios = async () => {
       try {
-        const response = await axios.get(`http://192.168.0.10:8000/api/inventarios/`);
+        const response = await axios.get(`https://patrimoniosemordem.nestguard.com.br/api/inventarios/`);
         const filteredPatrimonios = response.data.filter((pat: Patrimonio) =>
           pat.sala.toLowerCase() === salaNome.toLowerCase() // Filtra pelos patrimônios que pertencem à sala
         );
@@ -61,7 +61,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
 
   const deleteSala = async () => {
     try {
-      await axios.delete(`http://192.168.0.10:8000/api/delete_sala`, { data: { sala: salaNome } });
+      await axios.delete(`https://patrimoniosemordem.nestguard.com.br/api/delete_sala`, { data: { sala: salaNome } });
       Alert.alert('Sucesso', 'Sala deletada com sucesso!');
       onNavigate('Salas'); // Navega de volta para a tela Salas após a deleção
     } catch (error) {
@@ -89,7 +89,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
 
   const handleEdit = async () => {
     try {
-      await axios.put(`http://192.168.0.10:8000/api/editar_sala`, salaData);
+      await axios.put(`https://patrimoniosemordem.nestguard.com.br/api/editar_sala`, salaData);
       Alert.alert('Sucesso', 'Sala editada com sucesso!');
       setEditModalVisible(false);
     } catch (error) {
@@ -160,7 +160,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, themeStyles.modalContent]}>
-            <Text style={styles.modalTitle}>Opções</Text>
+            <Text style={[styles.modalTitle, themeStyles.modalTitle]}>Opções</Text>
             <TouchableOpacity style={styles.modalButton} onPress={() => { setEditModalVisible(true); setModalVisible(false); }}>
               <Text style={styles.modalButtonText}>Editar Sala</Text>
             </TouchableOpacity>
@@ -183,7 +183,7 @@ const PatrimoniosPorSala: React.FC<{ route: any; onNavigate: (screen: string) =>
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, themeStyles.modalContent]}>
-            <Text style={styles.modalTitle}>Editar Sala</Text>
+            <Text style={[styles.modalTitle, themeStyles.modalTitle]}>Editar Sala</Text>
             <TextInput
               placeholder="Nome da Sala"
               value={salaData.sala}
@@ -363,6 +363,9 @@ const lightTheme = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  modalTitle: {
+    color: '#000'
+  },
 });
 
 const darkTheme = StyleSheet.create({
@@ -390,6 +393,9 @@ const darkTheme = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+  },
+  modalTitle: {
+    color: '#fff'
   },
 });
 

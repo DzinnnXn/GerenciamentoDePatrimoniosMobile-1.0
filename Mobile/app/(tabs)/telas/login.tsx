@@ -52,7 +52,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
     setLoading(true);
     try {
       // Faz o login do usuário
-      const response = await fetch('http://192.168.0.10:8000/api/login/', {
+      const response = await fetch('https://patrimoniosemordem.nestguard.com.br/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigate }) => {
           onNavigate('ServiceHome');
         } else {
           // Se for um professor, busca a sala
-          const roomResponse = await fetch('http://192.168.0.10:8000/api/get_user_room/', {
+          const roomResponse = await fetch('https://patrimoniosemordem.nestguard.com.br/api/get_user_room/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

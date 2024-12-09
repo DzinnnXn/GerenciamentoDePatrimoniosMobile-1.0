@@ -63,7 +63,7 @@ const PatrimonioScreen: React.FC<PatrimonioScreenProps> = ({ onNavigate }) => {
 
   const fetchInventarios = async () => {
     try {
-      const response = await axios.get('http://192.168.0.10:8000/api/inventarios/');
+      const response = await axios.get('https://patrimoniosemordem.nestguard.com.br/api/inventarios/');
       setInventarios(response.data); // Atualiza o estado com os dados recebidos
     } catch (error) {
       console.error("Erro ao buscar os inventários", error);
@@ -90,7 +90,7 @@ const PatrimonioScreen: React.FC<PatrimonioScreenProps> = ({ onNavigate }) => {
           text: "Excluir",
           onPress: async () => {
             try {
-              const response = await axios.delete('http://192.168.0.10:8000/api/delete_inventario/', {
+              const response = await axios.delete('https://patrimoniosemordem.nestguard.com.br/api/delete_inventario/', {
                 data: { num_inventario: numInventario } // Usando num_inventario no corpo da requisição
               });
 
@@ -127,7 +127,7 @@ const PatrimonioScreen: React.FC<PatrimonioScreenProps> = ({ onNavigate }) => {
     }
 
     try {
-      const response = await axios.post('http://192.168.0.10:8000/api/add_inventario/', newItem);
+      const response = await axios.post('https://patrimoniosemordem.nestguard.com.br/api/add_inventario/', newItem);
       console.log("Resposta do servidor:", response.data); // Log da resposta do servidor
 
       Alert.alert("Sucesso", "Patrimônio adicionado com sucesso!"); // Mensagem de sucesso
@@ -180,7 +180,7 @@ const PatrimonioScreen: React.FC<PatrimonioScreenProps> = ({ onNavigate }) => {
     }
 
     try {
-      const response = await axios.put('http://192.168.0.10:8000/api/editar_inventario/', {
+      const response = await axios.put('https://patrimoniosemordem.nestguard.com.br/api/editar_inventario/', {
         num_inventario: selectedPatrimonio.num_inventario,
         denominacao: selectedPatrimonio.denominacao,
         localizacao: selectedPatrimonio.localizacao,

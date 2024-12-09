@@ -20,7 +20,7 @@ const EditarPerfilScreen: React.FC<EditarPerfilScreenProps> = ({ onNavigate }) =
 
   const fetchUserData = async (username: string) => {
     try {
-      const response = await axios.get('http://192.168.0.10:8000/api/user_dados', {
+      const response = await axios.get('https://patrimoniosemordem.nestguard.com.br/api/user_dados', {
         headers: {
           Authorization: username,
         },
@@ -57,7 +57,7 @@ const EditarPerfilScreen: React.FC<EditarPerfilScreenProps> = ({ onNavigate }) =
     try {
       const username = await AsyncStorage.getItem('user');
       await axios.put(
-        'http://192.168.0.10:8000/api/update_user_data',
+        'https://patrimoniosemordem.nestguard.com.br/api/update_user_data',
         {
           first_name: userData.first_name,
           last_name: userData.last_name,

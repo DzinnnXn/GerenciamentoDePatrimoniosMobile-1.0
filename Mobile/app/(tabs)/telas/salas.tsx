@@ -69,13 +69,13 @@ const SalasScreen: React.FC<SalasScreenProps> = ({ onNavigate }) => {
       const userType = await AsyncStorage.getItem('userType');
 
       if (userType === 'Coordenador') {
-        const response = await axios.get('http://192.168.0.10:8000/api/salas');
+        const response = await axios.get('https://patrimoniosemordem.nestguard.com.br/api/salas');
         setSalas(response.data);
       } else if (userType === 'Professor') {
         const storedUser = await AsyncStorage.getItem('user');
 
         if (storedUser) {
-          const response = await axios.post('http://192.168.0.10:8000/api/get_user_room/', {
+          const response = await axios.post('https://patrimoniosemordem.nestguard.com.br/api/get_user_room/', {
             username: storedUser
           });
 
@@ -116,7 +116,7 @@ const SalasScreen: React.FC<SalasScreenProps> = ({ onNavigate }) => {
     };
 
     try {
-      const response = await axios.post('http://192.168.0.10:8000/api/add_sala/', newRoom);
+      const response = await axios.post('https://patrimoniosemordem.nestguard.com.br/api/add_sala/', newRoom);
       const createdRoom = response.data;
 
       setSalas([...salas, createdRoom]);

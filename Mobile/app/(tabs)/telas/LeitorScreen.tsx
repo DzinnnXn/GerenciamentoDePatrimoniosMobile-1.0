@@ -81,7 +81,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
   useEffect(() => {
     async function fetchPatrimonios() {
       try {
-        const response = await axios.get<Patrimonio[]>('http://192.168.0.10:8000/api/inventarios/');
+        const response = await axios.get<Patrimonio[]>('https://patrimoniosemordem.nestguard.com.br/api/inventarios/');
         const updatedPatrimonios = response.data.map(p => ({
           ...p,
           validado: false, // Adiciona a propriedade validado
@@ -107,7 +107,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({ onNavigate }) => {
 
   async function atualizarStatusLocalizacao(num_inventario: string) {
     try {
-      const response = await axios.post('http://192.168.0.10:8000/api/atualizar-status/', {
+      const response = await axios.post('https://patrimoniosemordem.nestguard.com.br/api/atualizar-status/', {
         num_inventario: num_inventario,
       });
   

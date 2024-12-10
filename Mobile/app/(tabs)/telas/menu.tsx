@@ -80,16 +80,6 @@ const Menu: React.FC<MenuProps> = ({ onNavigate }) => {
       </View>
 
       <View style={styles.menuOptions}>
-        <View style={styles.option}>
-          <MaterialIcons name="brightness-6" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
-
-          <Text style={[styles.optionText, themeStyles.optionText]}>Tema do App</Text>
-
-          <Switch
-            trackColor={{ false: "#8B0000", true: "#8B0000" }}  // Track color (background) para o tema escuro e claro
-            thumbColor="#fff"  
-          />
-        </View>
 
         <TouchableOpacity style={styles.option} onPress={() => onNavigate('Perfil')}>
           <Ionicons name="person-outline" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
@@ -105,7 +95,7 @@ const Menu: React.FC<MenuProps> = ({ onNavigate }) => {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.option} onPress={() => onNavigate('')}>
+        <TouchableOpacity style={styles.option} >
           <Ionicons name="help-circle-outline" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
           <Text style={[styles.optionText, themeStyles.optionText]}>Ajuda</Text>
           <AntDesign name="right" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />

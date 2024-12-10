@@ -121,7 +121,7 @@ const PatrimonioScreen: React.FC<PatrimonioScreenProps> = ({ onNavigate }) => {
     }
 
     // Verifica se num_inventario contém exatamente 6 dígitos
-    if (!/^\d{6}$/.test(newItem.num_inventario)) {
+    if (!/^\d{6,7}$/.test(newItem.num_inventario)) {
       Alert.alert("Erro", "O número de inventário deve conter exatamente 6 dígitos."); // Mensagem de erro
       return; // Interrompe a função
     }
